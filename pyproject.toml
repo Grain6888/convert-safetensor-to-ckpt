@@ -1,0 +1,19 @@
+# pyproject.toml
+
+[project]
+name = "safetensors2ckpt"
+version = "0.1.0"
+description = "Convert .safetensors files to .ckpt format"
+readme = "README.md"
+requires-python = ">=3.12"
+
+# CLIツールとして使うだけなので依存は最小限
+dependencies = [
+    "torch",
+    "safetensors",
+    "numpy",
+]
+
+[tool.uv]
+# uv sync --frozen を使うため lock ファイルと整合性を保つ
+# 特別な設定は不要
