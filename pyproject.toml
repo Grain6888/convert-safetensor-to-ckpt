@@ -1,0 +1,16 @@
+# pyproject.toml
+
+[project]
+name = "safetensors2ckpt"
+version = "0.1.0"
+description = "Convert .safetensors files to .ckpt format"
+readme = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "torch",
+    "safetensors",
+    "numpy",
+]
+
+[tool.uv]
