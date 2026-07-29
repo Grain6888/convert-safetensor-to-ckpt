@@ -13,4 +13,9 @@ if [ -z "$OUTPUT_DIR" ]; then
   OUTPUT_DIR="$INPUT_DIR"
 fi
 
-uv run convert_safetensors_batch.py "$INPUT_DIR" "$OUTPUT_DIR"
+try {
+    uv run convert_safetensors_batch.py "$INPUT_DIR" "$OUTPUT_DIR"
+} catch {
+    echo "An error occurred: $?" >&2
+    exit 1
+}

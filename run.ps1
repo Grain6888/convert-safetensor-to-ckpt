@@ -9,4 +9,9 @@ if (-not $OutputDir) {
     $OutputDir = $InputDir
 }
 
-uv run convert_safetensors_batch.py $InputDir $OutputDir
+try {
+    uv run convert_safetensors_batch.py $InputDir $OutputDir
+} catch {
+    Write-Error "An error occurred: $_"
+    exit 1
+}
