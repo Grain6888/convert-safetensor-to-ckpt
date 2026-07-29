@@ -1,8 +1,8 @@
 # convert-safetensors-to-ckpt
 
-A simple utility that converts a `.safetensors` file into a `.ckpt` file (PyTorch checkpoint).
+A simple utility that converts `.safetensors` files into `.ckpt` files (PyTorch checkpoint).
 
-Some old tools may not support the newer `.safetensor` file format. This utility allows converting data to the old `.ckpt` format.
+Some old tools may not support the newer `.safetensor` file format. This utility allows converting data to the older `.ckpt` format.
 
 ## Usage
 
@@ -62,7 +62,7 @@ Or using the shell script:
 Or using the PowerShell script:
 
 ```ps1
-.\run.ps1 -InputDir models -OutputDir converted_models
+powershell -ExecutionPolicy Bypass -File run.ps1 -InputDir models -OutputDir converted_models
 ```
 
 `
