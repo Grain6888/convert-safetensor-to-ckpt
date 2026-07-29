@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 from pathlib import Path
 
 from convert_safetensors_to_ckpt import convert_safetensors_to_ckpt
@@ -19,45 +20,54 @@ def print_progress(current: int, total: int, bar_length: int = 30):
 
 
 def convert_directory(input_dir: str, output_dir: str | None):
-    input_path = normalize_path(input_dir)
+    try:
+        input_path = normalize_path(input_dir)
 
-    assert input_path.exists(), f"Error: 入力ディレクトリが存在しません: {input_path}"
+        if not input_path.exists():
+            raise FileNotFoundError(
+                f"Error: Input directory does not exist: {input_path}"
+            )
 
-    print(f"[INFO] Input:  {input_path}")
+        print(f"[INFO] Input:  {input_path}")
 
-    # safetensors を再帰的に収集
-    safetensors_files = list(input_path.rglob("*.safetensors"))
-    total = len(safetensors_files)
+        # Recursively collect safetensors files
+        safetensors_files = list(input_path.rglob("*.safetensors"))
+        total = len(safetensors_files)
 
-    assert total > 0, (
-        "Error: 入力ディレクトリに safetensors ファイルが見つかりませんでした"
-    )
+        if total == 0:
+            raise FileNotFoundError(
+                "Error: No safetensor files found in the input directory"
+            )
 
-    print(f"[INFO] 変換対象ファイル数: {total}")
+        print(f"[INFO] Conversion target files count: {total}")
 
-    for idx, safepath in enumerate(safetensors_files, start=1):
-        print_progress(idx, total)
+        for idx, safepath in enumerate(safetensors_files, start=1):
+            print_progress(idx, total)
 
-        # safetensors があるディレクトリ
-        safedir = safepath.parent
+            # Directory containing the safetensor file
+            safedir = safepath.parent
 
-        # output 未指定 → safetensors と同じディレクトリ
-        if output_dir is None:
-            ckpt_dir = safedir
-        else:
-            # output 指定 → safedir/output_dir の相対パス
-            ckpt_dir = safedir / output_dir
+            # Output directory not specified -> same as safetensor directory
+            if output_dir is None:
+                ckpt_dir = safedir
+            else:
+                # Output directory specified -> relative path
+                ckpt_dir = safedir / output_dir
 
-        ckpt_dir.mkdir(parents=True, exist_ok=True)
+            ckpt_dir.mkdir(parents=True, exist_ok=True)
 
-        ckpt_path = ckpt_dir / safepath.with_suffix(".ckpt").name
+            ckpt_path = ckpt_dir / safepath.with_suffix(".ckpt").name
 
-        if ckpt_path.exists():
-            print(f"[SKIP] {ckpt_path} は既に存在します")
-            continue
+            if ckpt_path.exists():
+                print(f"[SKIP] {ckpt_path} already exists")
+                continue
 
-        convert_safetensors_to_ckpt(str(safepath), str(ckpt_path))
-        print(f"[DONE] {ckpt_path}")
+            convert_safetensors_to_ckpt(str(safepath), str(ckpt_path))
+            print(f"[DONE] {ckpt_path}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
@@ -68,9 +78,13 @@ if __name__ == "__main__":
         "input_dir", type=str, help="Input directory containing .safetensors files"
     )
     parser.add_argument(
-        "output_dir", type=str, nargs="?", help="Relative output directory (optional)"
+        "output_dir",
+        type=str,
+        nargs="?",
+        default=None,
+        help="Relative output directory (optional)",
     )
     args = parser.parse_args()
 
-    # output_dir が None の場合は safetensors と同じディレクトリに出力
+    # If output_dir is not specified, use the same directory as the safetensor files
     convert_directory(args.input_dir, args.output_dir)
